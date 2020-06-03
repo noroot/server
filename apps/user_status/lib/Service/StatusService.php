@@ -118,7 +118,7 @@ class StatusService {
 			throw new InvalidStatusTypeException('Status-type "' . $statusType . '" is not supported');
 		}
 		// Check if statusIcon contains only one character
-		if (\mb_strlen($statusIcon) > 1) {
+		if ($statusIcon !== null && !$this->isValidEmoji($statusIcon)) {
 			throw new InvalidStatusIconException('Status-Icon is longer than one character');
 		}
 		// Check for maximum length of custom message
@@ -156,6 +156,50 @@ class StatusService {
 		}
 
 		$this->mapper->delete($userStatus);
+		return true;
+	}
+
+	/**
+	 * @param string $emoji
+	 * @return bool
+	 */
+	private function isValidEmoji(string $emoji): bool {
+		$intlBreakIterator = \IntlBreakIterator::createCharacterInstance();
+		$intlBreakIterator->setText($emoji);
+
+		$characterCount = 0;
+		while ($intlBreakIterator->next() !== \IntlBreakIterator::DONE) {
+			$characterCount++;
+		}
+
+		if ($characterCount !== 1) {
+			return false;
+		}
+
+		$codePointIterator = \IntlBreakIterator::createCodePointInstance();
+		$codePointIterator->setText($emoji);
+
+		foreach ($codePointIterator->getPartsIterator() as $codePoint) {
+			$codePointType = \IntlChar::charType($codePoint);
+
+			// If the current code-point is an emoji or a modifier (like a skin-tone)
+			// just continue and check the next character
+			if ($codePointType === \IntlChar::CHAR_CATEGORY_MODIFIER_SYMBOL ||
+				$codePointType === \IntlChar::CHAR_CATEGORY_MODIFIER_LETTER ||
+				$codePointType === \IntlChar::CHAR_CATEGORY_OTHER_SYMBOL) {
+				continue;
+			}
+
+			// If it's neither a modifier nor an emoji, we only allow
+			// a zero-width-joiner or a variation selector 16
+			$codePointValue = \IntlChar::ord($codePoint);
+			if ($codePointValue === 8205 || $codePointValue === 65039) {
+				continue;
+			}
+
+			return false;
+		}
+
 		return true;
 	}
 }

@@ -199,6 +199,12 @@ class StatusServiceTest extends TestCase {
 			// Clear at is in the past
 			['john.doe', 'busy', '📱', 'In a phone call', 10, true, false, true, InvalidClearAtException::class, 'ClearAt is in the past'],
 			['john.doe', 'busy', '📱', 'In a phone call', 10, false, false, true, InvalidClearAtException::class, 'ClearAt is in the past'],
+			// Test some more complex emojis with modifiers and zero-width-joiner
+			['john.doe', 'busy', '👩🏿‍💻', 'In a phone call', 42, true, true, false, null, null],
+			['john.doe', 'busy', '🤷🏼‍♀️', 'In a phone call', 42, true, true, false, null, null],
+			['john.doe', 'busy', '🏳️‍🌈', 'In a phone call', 42, true, true, false, null, null],
+			['john.doe', 'busy', '👨‍👨‍👦‍👦', 'In a phone call', 42, true, true, false, null, null],
+			['john.doe', 'busy', '👩‍❤️‍👩', 'In a phone call', 42, true, true, false, null, null],
 		];
 	}
 
