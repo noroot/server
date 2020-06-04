@@ -36,10 +36,10 @@ class Application extends \OCP\AppFramework\App {
 		parent::__construct(self::APP_ID);
 
 		$container = $this->getContainer();
-		$this->regsiterInitialState($container);
+		$this->registerInitialState($container);
 	}
 
-	private function regsiterInitialState(IAppContainer $container) {
+	private function registerInitialState(IAppContainer $container) {
 		/** @var IInitialStateService $initialState */
 		$initialState = $container->query(IInitialStateService::class);
 
